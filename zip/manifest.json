@@ -1,0 +1,29 @@
+{
+  "version": "1",
+  "information": {
+    "name": "ucrm-plugin-template",
+    "displayName": "UCRM Plugin Template",
+    "description": "This is an UCRM Plugin Template, as provided by Ubiquiti Networks, Inc.",
+    "url": "https://gitlab.com/ucrm-plugins/ucrm-plugin-template",
+    "version": "1.0.0",
+    "ucrmVersionCompliancy": {
+      "min": "2.11.0",
+      "max": null
+    },
+    "author": "Ryan Spaeth <rspaeth@mvqn.net>"
+  },
+  "configuration": [
+    {
+      "key": "test1",
+      "label": "Test #1",
+      "description": "This is a test configuration key/value pair.",
+      "required": 1
+    },
+    {
+      "key": "test2",
+      "label": "Test #2",
+      "description": "This is a test configuration key/value pair.",
+      "required": 0
+    }
+  ]
+}

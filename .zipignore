@@ -1,0 +1,7 @@
+.zipignore
+
+zip/data/config.json
+zip/data/plugin.log
+zip/ucrm.json
+
+#zip/vendor/
