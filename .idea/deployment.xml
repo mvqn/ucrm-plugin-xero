@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" autoUpload="On explicit save action" serverName="ucrm.dev.mvqn.net">
+    <serverData>
+      <paths name="ucrm.dev.mvqn.net">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/home/ucrm/data/ucrm/ucrm/data/plugins/ucrm-plugin-xero/" local="$PROJECT_DIR$/zip/" web="/" />
+          </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/zip/certs/" />
+            <excludedPath local="true" path="$PROJECT_DIR$/zip/data/" />
+            <excludedPath local="true" path="$PROJECT_DIR$/zip/ucrm.json" />
+          </excludedPaths>
+        </serverdata>
+      </paths>
+    </serverData>
+    <option name="myAutoUpload" value="ON_EXPLICIT_SAVE" />
+  </component>
+</project>

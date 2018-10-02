@@ -1,29 +1,94 @@
 {
-  "version": "1",
-  "information": {
-    "name": "ucrm-plugin-template",
-    "displayName": "UCRM Plugin Template",
-    "description": "This is an UCRM Plugin Template, as provided by Ubiquiti Networks, Inc.",
-    "url": "https://gitlab.com/ucrm-plugins/ucrm-plugin-template",
-    "version": "1.0.0",
-    "ucrmVersionCompliancy": {
-      "min": "2.11.0",
-      "max": null
+    "version": "1",
+    "information": {
+        "name": "ucrm-plugin-xero",
+        "displayName": "UCRM Plugin for Xero",
+        "description": "This is an UCRM Plugin for synchronizing Clients, Invoices, and Payments from UCRM to Xero.",
+        "url": "https://github.com/mvqn/ucrm-plugin-xero",
+        "version": "1.0.0",
+        "ucrmVersionCompliancy": {
+            "min": "2.12.0",
+            "max": null
+        },
+        "author": "Ryan Spaeth <rspaeth@mvqn.net>"
     },
-    "author": "Ryan Spaeth <rspaeth@mvqn.net>"
-  },
-  "configuration": [
-    {
-      "key": "test1",
-      "label": "Test #1",
-      "description": "This is a test configuration key/value pair.",
-      "required": 1
-    },
-    {
-      "key": "test2",
-      "label": "Test #2",
-      "description": "This is a test configuration key/value pair.",
-      "required": 0
-    }
-  ]
+    "configuration": [
+        {
+            "key": "consumerKey",
+            "label": "Xero API Consumer Key",
+            "description": "This is the Consumer Key provided by Xero when setting up your Private Application.",
+            "required": 1
+        },
+        {
+            "key": "consumerSecret",
+            "label": "Xero API Consumer Secret",
+            "description": "This is the Consumer Secret provided by Xero when setting up your Private Application.",
+            "required": 1
+        },
+        {
+            "key": "privateKey",
+            "label": "Xero API Private Key",
+            "description": "This is the Private Key (PEM) that was provided when generating the public/private keys.",
+            "required": 1,
+            "type": "textarea"
+        },
+        {
+            "key": "callbackUrl",
+            "label": "Xero API Callback URL",
+            "description": "The URL to be called when an authorization token is returned.",
+            "required": 1
+        },
+        {
+            "key": "startDate",
+            "label": "Synchronization Start Date",
+            "description": "The oldest date that the synchronization should allow.",
+            "required": 1,
+            "type": "date"
+        },
+        {
+            "key": "synchronizations",
+            "label": "Synchronization Type",
+            "description": "The type of synchronizations the plugin should perform.",
+            "required": 1,
+            "type": "choice",
+            "choices": {
+                "None": 0,
+                "Clients Only": 1,
+                "Clients & Invoices": 2,
+                "Clients, Invoices & Payments": 3,
+                "Clients, Invoices, Payments & Refunds": 4
+            }
+        },
+        {
+            "key": "xeroNameFormat",
+            "label": "Xero Name Format",
+            "description": "The format of non-business Contact names currently being used in Xero.",
+            "required": 1,
+            "type": "choice",
+            "choices": {
+                "FirstName LastName": 1,
+                "LastName, FirstName": 2
+            }
+        },
+        {
+            "key": "xeroForceContactOverwrite",
+            "label": "Force Xero Contact Overwrite?",
+            "description": "Force updates of Xero Contacts by UCRM Clients?",
+            "required": 0,
+            "type": "checkbox"
+        },
+        {
+            "key": "xeroContactGroup",
+            "label": "Xero Contact Group",
+            "description": "An optional Contact Group to assign newly synced Contacts, leave blank to bypass Contact Group assignment.",
+            "required": 0
+        },
+        {
+            "key": "xeroSalesAccountCode",
+            "label": "Xero Sales Account Code",
+            "description": "The Sales account code in Xero (i.e. 4000)",
+            "required": 1
+        }
+
+    ]
 }

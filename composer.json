@@ -8,13 +8,20 @@
             "email": "rspaeth@mvqn.net"
         }
     ],
+    "config": {
+        "vendor-dir": "zip/vendor"
+    },
     "require": {
         "php": "~7.1",
         "ext-json": "*",
-        "calcinai/xero-php": "~1.8",
-        "guzzlehttp/guzzle": "~6.0",
-        "mvqn/ucrm-module-core": "~1.0.0",
-        "mvqn/ucrm-module-rest": "dev-master"
+        "ext-curl": "*",
+        "ext-zip": "*",
+        "ext-pdo": "*",
+        "mvqn/rest": "~1",
+        "mvqn/rest-ucrm": "~1",
+        "mvqn/ucrm-common": "~1",
+
+        "calcinai/xero-php": "~1.8"
     },
     "require-dev": {
         "phpunit/phpunit": "7.2.7",
@@ -23,7 +30,8 @@
     "autoload": {
         "psr-4": {
             "UCRM\\": "zip/src/UCRM/",
-            "Xero\\": "zip/src/Xero/"
+            "Xero\\": "zip/src/Xero/",
+            "MVQN\\": "zip/src/MVQN/"
         }
     }
 }
