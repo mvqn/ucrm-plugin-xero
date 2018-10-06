@@ -350,33 +350,35 @@ final class Synchronizer
             $inSourceMissing = in_array($name, $sourceChanges->getMissing());
             $inDestinationMissing = in_array($name, $destinationChanges->getMissing());
 
-
+            // IF the mapping contains only the source 'key"...
             if($mappingHasSource && !$mappingHasDestination)
             {
+                // THEN remove the mapping from the missing source list!
                 if($inSourceMissing)
                     $sourceChanges->delMissing($name);
 
+                // AND add the mapping to the missing destination list!
                 if(!$inDestinationMissing)
                     $destinationChanges->addMissing($name);
 
                 continue;
             }
 
+            // IF the mapping contains only the destination 'key"...
             if(!$mappingHasSource && $mappingHasDestination)
             {
+                // THEN add the mapping to the missing source list!
                 if(!$inSourceMissing)
                     $sourceChanges->addMissing($name);
 
+                // AND remove the mapping from the missing destination list!
                 if($inDestinationMissing)
                     $destinationChanges->delMissing($name);
 
                 continue;
             }
 
-
-
-
-
+            // TODO: Add any other possible combinations, as needed!
         }
 
 
