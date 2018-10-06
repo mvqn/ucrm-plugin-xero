@@ -19,7 +19,10 @@ final class ClassMap
     private $property;
 
     /** @var callable */
-    private $generator;
+    private $keyGenerator;
+
+    /** @var callable */
+    private $valueGenerator;
 
 
     public function __construct(string $class, callable $nameGenerator, string $key, string $property)
@@ -30,7 +33,7 @@ final class ClassMap
 
         $this->class = $class;
 
-        $this->generator = $nameGenerator;
+        $this->keyGenerator = $nameGenerator;
 
         //if(!property_exists($class, $key))
         //    throw new \Exception("Class '$class' does not have a property '$key'!");
@@ -48,7 +51,7 @@ final class ClassMap
 
     public function generateName($class): string
     {
-        return call_user_func($this->generator, $class);
+        return call_user_func($this->keyGenerator, $class);
     }
 
 
