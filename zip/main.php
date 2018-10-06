@@ -10,6 +10,8 @@ use MVQN\UCRM\Plugins\Plugin;
 use MVQN\REST\UCRM\Endpoints\Client;
 use MVQN\REST\UCRM\Endpoints\Version;
 use MVQN\REST\UCRM\Endpoints\Invoice;
+use MVQN\REST\UCRM\Endpoints\CustomAttribute;
+use MVQN\REST\UCRM\Endpoints\Lookups\ClientContactAttribute;
 
 use UCRM\Converters\ClientConverter;
 use UCRM\Synchronizers\ClientSynchronizer;
@@ -31,6 +33,7 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
  * Main file of the plugin. This is what will be executed when the plugin is run by UCRM.
  *
  */
+
 
 (function ()
 {
@@ -73,6 +76,25 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
     {
         /** @var Client[] $ucrmClients */
         $ucrmClients = Client::get()->elements();
+
+        $ucrmClientsMap = [];
+
+        foreach($ucrmClients as $ucrmClient)
+        {
+            $xeroName = ClientConverter::toXeroContactName($ucrmClient);
+
+            if(!array_key_exists($xeroName, $ucrmClientsMap))
+            {
+                $ucrmClientsMap[$xeroName] = $ucrmClient;
+            }
+            else
+            {
+                // This is a duplicate UCRM Client...
+                // TODO: Determine how we want to handle this long term, for now skip duplicates!
+                echo "";
+            }
+        }
+
         Log::write("INFO : Successfully connected to the UCRM REST API!");
     }
     catch(\Exception $e)
@@ -132,6 +154,14 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
     {
         /** @var XeroContact[] $xeroContacts */
         $xeroContacts = $xero->load(XeroContact::class)->execute()->getArrayCopy();
+
+        $xeroContactsMap = [];
+
+        foreach($xeroContacts as $xeroContact)
+        {
+            $xeroContactsMap[$xeroContact->getName()] = $xeroContact;
+        }
+
         Log::write("INFO : Successfully connected to the UCRM REST API!");
     }
     catch(\Exception $e)
@@ -170,61 +200,105 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
 
     $map = ClientSynchronizer::map($ucrmClients, $xeroContacts, $ucrmChanges, $xeroChanges);
 
-    echo "UCRM CHANGES: ".json_encode($ucrmChanges)."\n";
-    echo "XERO CHANGES: ".json_encode($xeroChanges)."\n";
+    echo "UCRM CHANGES: ".$ucrmChanges."\n";
+    echo "XERO CHANGES: ".$xeroChanges."\n";
 
-    $sourceHandler = function(Client $client)
+    die();
+
+
+    // CREATE Custom Attribute in UCRM, as needed!
+
+    /** @var CustomAttribute|null $clientAttribute */
+    $clientAttribute = null;
+    $existingAttributes = CustomAttribute::get()->where("key", "xeroId");
+
+    if($existingAttributes->count() === 0)
     {
-        $format = Plugin::config()->getValue("xeroNameFormat");
+        $xeroIdAttribute = new CustomAttribute([
+            "name" => "Xero ID",
+            "attributeType" => CustomAttribute::ATTRIBUTE_TYPE_CLIENT
+        ]);
 
-        switch($client->getClientType())
+        $clientAttribute = $xeroIdAttribute->insert();
+    }
+    else
+    {
+        $clientAttribute = $existingAttributes->first();
+    }
+
+    // PAIRING
+    $ucrmHandled = [];
+
+    foreach($ucrmClients as $client)
+    {
+        /** @var Client $client */
+
+        /** @var Collection $attributes */
+        $attributes = $client->getAttributes();
+        /** @var ClientContactAttribute|null $xeroAttribute */
+        $matching = $attributes->where("key", "xeroId");
+
+        if($matching->count() === 0)
         {
-            case Client::CLIENT_TYPE_RESIDENTIAL:
-                $first = $client->getFirstName();
-                $last = $client->getLastName();
+            $xeroName = ClientConverter::toXeroContactName($client);
 
-                switch($format)
-                {
-                    case 1:
-                        return $client->getFirstName()." ".$client->getLastName();
-                        break;
-                    case 2:
-                        return $client->getLastName().", ".$client->getFirstName();
-                        break;
-                    default:
-                        break;
-                }
-                break;
+            if(!array_key_exists($xeroName, $xeroContactsMap))
+            {
+                // NEED to create the Xero Contact First!!!
 
-            case Client::CLIENT_TYPE_COMMERCIAL:
-                $first = $client->getCompanyContactFirstName();
-                $last = $client->getCompanyContactLastName();
-                return $client->getCompanyName();
-                break;
+                continue;
+            }
 
-            default:
-                break;
+            /** @var XeroContact $xeroContact */
+            $xeroContact = $xeroContactsMap[$xeroName];
+            $xeroGuid = $xeroContact->getGUID();
+
+            $attributes->push(new ClientContactAttribute([
+                "customAttributeId" => $clientAttribute->getId(),
+                "value" => $xeroGuid
+            ]));
+
+            $client->setAttributes($attributes);
+
+            $updated = $client->update();
+        }
+        else
+        {
+            // Existing Xero GUID set on Client OR UCRM User has overridden, so do nothing!
+            echo "";
         }
 
-        Log::write("ERROR: Name could not be determined from the provided Client: ".$client);
-        return "";
-    };
 
-    $destinationHandler = function(XeroContact $contact)
-    {
-        return $contact->getName();
-    };
 
-    $sourceMap = new ClassMap(Client::class, $sourceHandler, "ucrmId", "id");
-    $destinationMap = new ClassMap(XeroContact::class, $destinationHandler, "xeroId", "GUID");
 
-    $testMap = Synchronizer::map($ucrmClients, $xeroContacts, $sourceMap, $destinationMap, $sourceChanges, $destinationChanges, __DIR__."/data/test-clients.json");
 
-    echo "UCRM CHANGES: ".$sourceChanges."\n";
-    echo "XERO CHANGES: ".$destinationChanges."\n";
+
+
+
+
+
+
+
+
+
+
+
+    }
 
 
     die();
+
+    echo "";
+
+
+
+
+    //$attributes = $client->getAttributes();
+    //$attributes->push(new \MVQN\REST\UCRM\Endpoints\CustomAttribute())
+
+
+    die();
+
 
     // =================================================================================================================
     // SYNCHRONIZATION: CONTACT GROUP (Optional)

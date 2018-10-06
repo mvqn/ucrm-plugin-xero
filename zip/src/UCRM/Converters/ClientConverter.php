@@ -3,23 +3,32 @@ declare(strict_types=1);
 
 namespace UCRM\Converters;
 
+use MVQN\Collections\Collection;
 use MVQN\Common\Strings;
+
 use MVQN\REST\UCRM\Endpoints\Client;
 use MVQN\REST\UCRM\Endpoints\Lookups\ClientBankAccount;
 use MVQN\REST\UCRM\Endpoints\Lookups\ClientContact;
+
 use MVQN\UCRM\Plugins\Log;
 use MVQN\UCRM\Plugins\Plugin;
+
+use UCRM\Synchronizers\ClientSynchronizer;
+
 use XeroPHP\Models\Accounting\Address;
 use XeroPHP\Models\Accounting\Contact as XeroContact;
-use MVQN\Collections\Collection;
 use XeroPHP\Models\Accounting\ContactGroup;
 use XeroPHP\Models\Accounting\Phone;
 
+/**
+ * Class ClientConverter
+ *
+ * @package UCRM\Converters
+ * @author Ryan Spaeth <rspaeth@mvqn.net>
+ * @final
+ */
 final class ClientConverter
 {
-    public const XERO_NAME_FORMAT_FIRST_LAST = 1;
-    public const XERO_NAME_FORMAT_LAST_FIRST = 2;
-    // TODO: Add other formats as requested...
 
 
 
@@ -31,6 +40,13 @@ final class ClientConverter
 
     private const REGEX_PHONE_NUMBERS =
         '/^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$/';
+
+
+
+
+
+
+
 
 
     /**
@@ -52,10 +68,10 @@ final class ClientConverter
 
                 switch($format)
                 {
-                    case self::XERO_NAME_FORMAT_FIRST_LAST:
+                    case ClientSynchronizer::XERO_NAME_FORMAT_FIRST_LAST:
                         return $client->getFirstName()." ".$client->getLastName();
                         break;
-                    case self::XERO_NAME_FORMAT_LAST_FIRST:
+                    case ClientSynchronizer::XERO_NAME_FORMAT_LAST_FIRST:
                         return $client->getLastName().", ".$client->getFirstName();
                         break;
                     default:

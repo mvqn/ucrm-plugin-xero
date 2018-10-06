@@ -21,6 +21,8 @@ final class MapResults
     /** @var string[] */
     private $missing;
 
+    /** @var string[] */
+    private $duplicated;
 
 
     public function __construct()
@@ -29,14 +31,12 @@ final class MapResults
         $this->updated = [];
         $this->deleted = [];
         $this->missing = [];
+        $this->duplicated = [];
     }
 
     public function __toString()
     {
         return json_encode(get_object_vars($this));
-
-
-
     }
 
 
@@ -153,19 +153,51 @@ final class MapResults
     }
 
     /**
-     * @param int $index
+     * @param string $key
      * @return MapResults
      */
-    public function delMissing(int $index): self
+    public function delMissing(string $key): self
     {
-        // Delete the specified item and reindex the array.
-        unset($this->missing[$index]);
-        $this->missing = array_values($this->missing);
+        if(in_array($key, $this->missing))
+        {
+            // Delete the specified item and reindex the array.
+            unset($this->missing[array_search($key, $this->missing)]);
+            $this->missing = array_values($this->missing);
+        }
 
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
+    public function getDuplicated(): array
+    {
+        return $this->duplicated;
+    }
 
+    /**
+     * @param string $key
+     * @return MapResults
+     */
+    public function addDuplicated(string $key): self
+    {
+        $this->duplicated[] = $key;
+        return $this;
+    }
+
+    /**
+     * @param int $index
+     * @return MapResults
+     */
+    public function delDuplicated(int $index): self
+    {
+        // Delete the specified item and reindex the array.
+        unset($this->duplicated[$index]);
+        $this->duplicated = array_values($this->duplicated);
+
+        return $this;
+    }
 
 
 
