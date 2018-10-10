@@ -90,6 +90,7 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
             else
             {
                 // This is a duplicate UCRM Client...
+
                 // TODO: Determine how we want to handle this long term, for now skip duplicates!
                 echo "";
             }
@@ -101,7 +102,6 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
     {
         Log::write("ERROR: Could not connect to the UCRM REST API!");
         die();
-
     }
 
     // =================================================================================================================
@@ -171,16 +171,28 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
     }
 
     // =================================================================================================================
-    // MAPPING
+    // OPTIONS
     // -----------------------------------------------------------------------------------------------------------------
 
     $startDate = array_key_exists("startDate", $ucrmConfig) ?
         $ucrmConfig["startDate"] :
         null;
 
+    if($startDate === null)
+    {
+        Log::write("ERROR: A 'Start Date' must be provided in UCRM Plugin Settings!");
+        die();
+    }
+
     $synchronizations = array_key_exists("synchronizations", $ucrmConfig) ?
         $ucrmConfig["synchronizations"] :
         null;
+
+    if($synchronizations === null)
+    {
+        Log::write("ERROR: A 'Synchronization Type' must be provided in UCRM Plugin Settings!");
+        die();
+    }
 
     $format = array_key_exists("xeroNameFormat", $ucrmConfig) ?
         $ucrmConfig["xeroNameFormat"] :
@@ -188,23 +200,15 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
 
     $forceOverwrite = array_key_exists("xeroForceContactOverwrite", $ucrmConfig) ?
         $ucrmConfig["xeroForceContactOverwrite"] :
-        null;
+        false; // DEFAULT
 
     $useContactGroup = array_key_exists("xeroContactGroup", $ucrmConfig) ?
         $ucrmConfig["xeroContactGroup"] :
-        null;
+        null; // DEFAULT
 
     // =================================================================================================================
-    // MAPPING
+    // ONE-TIME UCRM CONFIG
     // -----------------------------------------------------------------------------------------------------------------
-
-    $map = ClientSynchronizer::map($ucrmClients, $xeroContacts, $ucrmChanges, $xeroChanges);
-
-    echo "UCRM CHANGES: ".$ucrmChanges."\n";
-    echo "XERO CHANGES: ".$xeroChanges."\n";
-
-    die();
-
 
     // CREATE Custom Attribute in UCRM, as needed!
 
@@ -225,6 +229,29 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
     {
         $clientAttribute = $existingAttributes->first();
     }
+
+    if($clientAttribute === null)
+    {
+        Log::write("ERROR: Unable to find or create the necessary Custom Attribute field in UCRM!");
+        die();
+    }
+
+    // =================================================================================================================
+    // MAPPING
+    // -----------------------------------------------------------------------------------------------------------------
+
+    // Clear existing data, if the "overwrite" flag is set!
+    if($forceOverwrite && file_exists(Plugin::dataPath()."/clients.json"))
+        unlink(Plugin::dataPath()."/clients.json");
+
+    // Create or update the Client map.
+    $map = ClientSynchronizer::map($ucrmClients, $xeroContacts, $ucrmChanges, $xeroChanges);
+
+    echo "UCRM CHANGES: ".$ucrmChanges."\n";
+    echo "XERO CHANGES: ".$xeroChanges."\n";
+
+    die();
+
 
     // PAIRING
     $ucrmHandled = [];

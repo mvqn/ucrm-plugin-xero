@@ -11,8 +11,6 @@ use MVQN\UCRM\Plugins\Plugin;
 
 final class Synchronizer
 {
-
-
     /**
      * @param array $source
      * @param array $destination
@@ -28,7 +26,7 @@ final class Synchronizer
         ?MapResults &$sourceChanges = null, ?MapResults &$destinationChanges = null, string $mapFile = ""): array
     {
         // Load the existing JSON map file, if one exists...
-        $map = file_exists($mapFile) ? json_decode(file_get_contents($mapFile), true) : [];
+        $map = ($mapFile !== "" && file_exists($mapFile)) ? json_decode(file_get_contents($mapFile), true) : [];
 
         // Get the source's "key" and "property" property.
         $sourceKey = $sourceMap->getKey();
