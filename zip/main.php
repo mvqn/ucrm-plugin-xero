@@ -18,7 +18,9 @@ use UCRM\Synchronizers\ClientSynchronizer;
 use UCRM\Synchronizers\InvoiceSynchronizer;
 
 use MVQN\Synchronization\ClassMap;
+use MVQN\Synchronization\MapResults;
 use MVQN\Synchronization\Synchronizer;
+
 
 use XeroPHP\Application\PrivateApplication;
 
@@ -79,6 +81,8 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
 
         $ucrmClientsMap = [];
 
+        $ucrmValid = true;
+
         foreach($ucrmClients as $ucrmClient)
         {
             $xeroName = ClientConverter::toXeroContactName($ucrmClient);
@@ -86,22 +90,33 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
             if(!array_key_exists($xeroName, $ucrmClientsMap))
             {
                 $ucrmClientsMap[$xeroName] = $ucrmClient;
+
+                if($ucrmClient->getContacts()->count() > 5)
+                {
+                    Log::write("WARN : Xero Contacts can only contain a maximum of 5 contact persons!");
+                    $ucrmValid = false;
+                }
+
+                // TODO: Add further pre-checks here, as needed!
             }
             else
             {
                 // This is a duplicate UCRM Client...
+                Log::write("WARN : A UCRM Client named '$xeroName' already exists and Xero requires unique names!");
 
                 // TODO: Determine how we want to handle this long term, for now skip duplicates!
-                echo "";
+                //$ucrmValid = false;
             }
         }
+
+        if(!$ucrmValid)
+            die("UCRM Pre-Checks have failed, check the log for further information!");
 
         Log::write("INFO : Successfully connected to the UCRM REST API!");
     }
     catch(\Exception $e)
     {
-        Log::write("ERROR: Could not connect to the UCRM REST API!");
-        die();
+        die("ERROR: Could not connect to the UCRM REST API!");
     }
 
     // =================================================================================================================
@@ -113,29 +128,34 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
     $xeroConsumerSecret = array_key_exists("consumerSecret", $ucrmConfig) ? $ucrmConfig["consumerSecret"] : null;
     $xeroPrivateKey = array_key_exists("privateKey", $ucrmConfig) ? $ucrmConfig["privateKey"] : null;
 
+    $xeroSettingsValid = true;
+
     if ($xeroCallbackUrl === null)
     {
         Log::write("ERROR: The 'callbackUrl' entry appears to be missing from 'config.json'!");
-        die();
+        $xeroSettingsValid = false;
     }
 
     if ($xeroConsumerKey === null)
     {
         Log::write("ERROR: The 'consumerKey' entry appears to be missing from 'config.json'!");
-        die();
+        $xeroSettingsValid = false;
     }
 
     if ($xeroConsumerSecret === null)
     {
         Log::write("ERROR: The 'consumerSecret' entry appears to be missing from 'config.json'!");
-        die();
+        $xeroSettingsValid = false;
     }
 
     if ($xeroPrivateKey === null)
     {
         Log::write("ERROR: The 'privateKey' entry appears to be missing from 'config.json'!");
-        die();
+        $xeroSettingsValid = false;
     }
+
+    if(!$xeroSettingsValid)
+        die("Xero Settings are invalid, check the log for further information!");
 
     //These are the minimum settings - for more options, refer to examples/config.php
     $config = [
@@ -157,10 +177,17 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
 
         $xeroContactsMap = [];
 
+        $xeroValid = true;
+
         foreach($xeroContacts as $xeroContact)
         {
             $xeroContactsMap[$xeroContact->getName()] = $xeroContact;
+
+            // TODO: Add any pre-checks here, as needed!
         }
+
+        if(!$xeroValid)
+            die("Xero Pre-Checks have failed, check the log for further information!");
 
         Log::write("INFO : Successfully connected to the UCRM REST API!");
     }
@@ -174,6 +201,8 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
     // OPTIONS
     // -----------------------------------------------------------------------------------------------------------------
 
+    $xeroSettingsValid = true;
+
     $startDate = array_key_exists("startDate", $ucrmConfig) ?
         $ucrmConfig["startDate"] :
         null;
@@ -181,7 +210,7 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
     if($startDate === null)
     {
         Log::write("ERROR: A 'Start Date' must be provided in UCRM Plugin Settings!");
-        die();
+        $xeroSettingsValid = false;
     }
 
     $synchronizations = array_key_exists("synchronizations", $ucrmConfig) ?
@@ -191,20 +220,41 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
     if($synchronizations === null)
     {
         Log::write("ERROR: A 'Synchronization Type' must be provided in UCRM Plugin Settings!");
-        die();
+        $xeroSettingsValid = false;
     }
 
     $format = array_key_exists("xeroNameFormat", $ucrmConfig) ?
         $ucrmConfig["xeroNameFormat"] :
-        ClientSynchronizer::XERO_NAME_FORMAT_FIRST_LAST; // DEFAULT
+        null;
+
+    if($format === null)
+    {
+        Log::write("WARN : A 'Xero Name Format' was not provided in UCRM Plugin Settings, default used!");
+        $format = ClientSynchronizer::XERO_NAME_FORMAT_FIRST_LAST; // DEFAULT
+    }
 
     $forceOverwrite = array_key_exists("xeroForceContactOverwrite", $ucrmConfig) ?
         $ucrmConfig["xeroForceContactOverwrite"] :
-        false; // DEFAULT
+        null;
+
+    if($forceOverwrite === null)
+    {
+        Log::write("WARN : A 'Xero Force Contact Overwrite' was not provided in UCRM Plugin Settings, default used!");
+        $forceOverwrite = false; // DEFAULT
+    }
 
     $useContactGroup = array_key_exists("xeroContactGroup", $ucrmConfig) ?
         $ucrmConfig["xeroContactGroup"] :
-        null; // DEFAULT
+        null;
+
+    if($forceOverwrite === null)
+    {
+        Log::write("INFO : A 'Xero Contact FGroup' was not provided in UCRM Plugin Settings, default used!");
+        $useContactGroup = null; // DEFAULT
+    }
+
+    if(!$xeroSettingsValid)
+        die("Xero Settings are invalid, check the log for further information!");
 
     // =================================================================================================================
     // ONE-TIME UCRM CONFIG
@@ -224,6 +274,8 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
         ]);
 
         $clientAttribute = $xeroIdAttribute->insert();
+
+        Log::write("INFO : A Custom Attribute of 'Xero ID' has been created for use by Clients!");
     }
     else
     {
@@ -250,7 +302,81 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
     echo "UCRM CHANGES: ".$ucrmChanges."\n";
     echo "XERO CHANGES: ".$xeroChanges."\n";
 
+
     die();
+
+
+
+
+
+    // =================================================================================================================
+    // SYNCHRONIZATION: CONTACT GROUP (Optional)
+    // -----------------------------------------------------------------------------------------------------------------
+
+    /** @var XeroContactGroup $contactGroup */
+    $contactGroup = null;
+
+    if($useContactGroup !== null && $useContactGroup !== "")
+    {
+        $existing = $xero->load(XeroContactGroup::class)
+            ->where("Name", $useContactGroup)
+            ->execute();
+
+        if($existing !== null && $existing->first() !== null)
+        {
+            // ContactGroup already exists!
+            $contactGroup = $existing->first();
+        }
+        else
+        {
+            // Need to create the ContactGroup first!
+            $contactGroup = new XeroContactGroup();
+            $contactGroup->setName($useContactGroup);
+
+            // Actually create the group in Xero
+            $xero->save($contactGroup);
+        }
+    }
+
+    // =================================================================================================================
+    // SYNCHRONIZATION: CLIENTS
+    // -----------------------------------------------------------------------------------------------------------------
+
+    /** @var MapResults $ucrmChanges */
+    /** @var MapResults $xeroChanges */
+
+    $addedIndices = [];
+
+    $xeroMissing = $xeroChanges->getMissing();
+
+    foreach($xeroMissing as $index => $name)
+    {
+        //$ucrmId = $map[$name]["ucrmId"];
+        $ucrmClient = $ucrmClientsMap[$name];
+
+        $xeroContact = ClientConverter::toNewXeroContact($ucrmClient, $contactGroup);
+
+        $results = $xero->save($xeroContact);
+
+        if($results->getStatus() === 200 && count($results->getElements()) > 0)
+        {
+            $inserted = $results->getElements()[0];
+            $xeroId = $inserted["ContactID"];
+
+            $map[$name]["xeroId"] = $xeroId;
+            $xeroChanges->delMissing($name);
+        }
+    }
+
+    file_put_contents(Plugin::dataPath()."/clients.json", json_encode($map, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+
+
+
+    echo "UCRM CHANGES: ".$ucrmChanges."\n";
+    echo "XERO CHANGES: ".$xeroChanges."\n";
+
+    die();
+
 
 
     // PAIRING
@@ -294,88 +420,9 @@ use XeroPHP\Models\Accounting\Organisation as XeroOrganization;
             // Existing Xero GUID set on Client OR UCRM User has overridden, so do nothing!
             echo "";
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 
 
-    die();
-
-    echo "";
-
-
-
-
-    //$attributes = $client->getAttributes();
-    //$attributes->push(new \MVQN\REST\UCRM\Endpoints\CustomAttribute())
-
-
-    die();
-
-
-    // =================================================================================================================
-    // SYNCHRONIZATION: CONTACT GROUP (Optional)
-    // -----------------------------------------------------------------------------------------------------------------
-
-    /** @var XeroContactGroup $contactGroup */
-    $contactGroup = null;
-
-    if($useContactGroup !== null && $useContactGroup !== "")
-    {
-        $existing = $xero->load(XeroContactGroup::class)
-            ->where("Name", $useContactGroup)
-            ->execute();
-
-        if($existing !== null && $existing->first() !== null)
-        {
-            // ContactGroup already exists!
-            $contactGroup = $existing->first();
-        }
-        else
-        {
-            // Need to create the ContactGroup first!
-            $contactGroup = new XeroContactGroup();
-            $contactGroup->setName($useContactGroup);
-
-            // Actually create the group in Xero
-            $xero->save($contactGroup);
-        }
-    }
-
-    // =================================================================================================================
-    // SYNCHRONIZATION: CLIENTS
-    // -----------------------------------------------------------------------------------------------------------------
-
-    $contactUpdates = ClientSynchronizer::changesToXero($map, $contactGroup, false, $modified);
-
-    if(count($contactUpdates) > 0)
-    {
-        $results = $xero->saveAll($contactUpdates);
-        $errors = $results->getElementErrors();
-        $warnings = $results->getElementErrors();
-
-        foreach ($results->getElements() as $element)
-        {
-
-
-            echo "";
-        }
-
-    }
 
 
 

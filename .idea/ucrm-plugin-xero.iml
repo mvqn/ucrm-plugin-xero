@@ -13,6 +13,7 @@
       <excludeFolder url="file://$MODULE_DIR$/zip/vendor/mvqn/common" />
       <excludeFolder url="file://$MODULE_DIR$/zip/vendor/mvqn/rest" />
       <excludeFolder url="file://$MODULE_DIR$/zip/vendor/mvqn/rest-ucrm" />
+      <excludeFolder url="file://$MODULE_DIR$/zip/vendor/mvqn/synchronization" />
       <excludeFolder url="file://$MODULE_DIR$/zip/vendor/mvqn/ucrm-common" />
       <excludeFolder url="file://$MODULE_DIR$/zip/vendor/myclabs/deep-copy" />
       <excludeFolder url="file://$MODULE_DIR$/zip/vendor/phar-io/manifest" />

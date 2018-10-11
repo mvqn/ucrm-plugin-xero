@@ -38,6 +38,7 @@
       <path value="$PROJECT_DIR$/zip/vendor/sebastian/resource-operations" />
       <path value="$PROJECT_DIR$/zip/vendor/phar-io/version" />
       <path value="$PROJECT_DIR$/zip/vendor/phar-io/manifest" />
+      <path value="$PROJECT_DIR$/zip/vendor/mvqn/synchronization" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="7.1" />

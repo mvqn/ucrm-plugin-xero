@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "53743b1f3042dbf390c4be24ccdf4724",
+    "content-hash": "38c1a0f18ebce569a3d37de77a65cd07",
     "packages": [
         {
             "name": "calcinai/xero-php",
@@ -128,16 +128,16 @@
         },
         {
             "name": "mvqn/common",
-            "version": "1.1.0",
+            "version": "1.1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mvqn/common.git",
-                "reference": "ef2a70907c3fd1a96692338e19aa2b4f06231b30"
+                "reference": "8bdbb6f8eff967aab577204127343f646e03a8e2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mvqn/common/zipball/ef2a70907c3fd1a96692338e19aa2b4f06231b30",
-                "reference": "ef2a70907c3fd1a96692338e19aa2b4f06231b30",
+                "url": "https://api.github.com/repos/mvqn/common/zipball/8bdbb6f8eff967aab577204127343f646e03a8e2",
+                "reference": "8bdbb6f8eff967aab577204127343f646e03a8e2",
                 "shasum": ""
             },
             "require": {
@@ -164,7 +164,7 @@
                 }
             ],
             "description": "A library of common classes and functions, specifically designed for use in MVQN projects, but generic enough for anything!",
-            "time": "2018-09-25T05:23:10+00:00"
+            "time": "2018-09-29T19:26:46+00:00"
         },
         {
             "name": "mvqn/rest",
@@ -255,6 +255,46 @@
             ],
             "description": "A simple REST Client library for interfacing with UCRM Endpoints.",
             "time": "2018-09-25T06:12:06+00:00"
+        },
+        {
+            "name": "mvqn/synchronization",
+            "version": "1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/mvqn/synchronization.git",
+                "reference": "5e4d2851790f762a17f39d264a983efdf05704ba"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/mvqn/synchronization/zipball/5e4d2851790f762a17f39d264a983efdf05704ba",
+                "reference": "5e4d2851790f762a17f39d264a983efdf05704ba",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "~7.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "7.2.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MVQN\\": "src/MVQN/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ryan Spaeth",
+                    "email": "rspaeth@mvqn.net"
+                }
+            ],
+            "description": "A library for synchronization, specifically designed for use in MVQN projects, but generic enough for anything!",
+            "time": "2018-10-11T02:53:14+00:00"
         },
         {
             "name": "mvqn/ucrm-common",
@@ -721,16 +761,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "6.0.7",
+            "version": "6.0.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "865662550c384bc1db7e51d29aeda1c2c161d69a"
+                "reference": "848f78b3309780fef7ec8c4666b7ab4e6b09b22f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/865662550c384bc1db7e51d29aeda1c2c161d69a",
-                "reference": "865662550c384bc1db7e51d29aeda1c2c161d69a",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/848f78b3309780fef7ec8c4666b7ab4e6b09b22f",
+                "reference": "848f78b3309780fef7ec8c4666b7ab4e6b09b22f",
                 "shasum": ""
             },
             "require": {
@@ -780,7 +820,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2018-06-01T07:51:50+00:00"
+            "time": "2018-10-04T03:41:23+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -1768,7 +1808,8 @@
         "php": "~7.1",
         "ext-json": "*",
         "ext-curl": "*",
-        "ext-zip": "*"
+        "ext-zip": "*",
+        "ext-pdo": "*"
     },
     "platform-dev": []
 }
